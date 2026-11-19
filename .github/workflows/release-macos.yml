@@ -69,12 +69,17 @@ jobs:
           NOTARY_PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
         run: bash scripts/build-release.sh
 
+      # Short-lived copy for non-tag runs only: on a tag the release below is
+      # the durable copy, and the artifact would only count against the free
+      # plan's 0.5 GB Actions storage.
       - name: Upload artifacts
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         uses: actions/upload-artifact@v4
         with:
           name: MyWidgets-macos
           path: dist/*.dmg
           if-no-files-found: error
+          retention-days: 1
 
       # On a tag push, publish a release with the .dmg attached.
       - name: Attach to release
